@@ -17,7 +17,7 @@ def rename_by_order(path: str, extension: str):
     # 遍历文件并重命名
     for file in files:
         # 构造新文件名
-        new_name = str(count) + '.' + extension
+        new_name = "{:0>2d}".format(count) + '.' + extension
         # 拼接路径和文件名
         src = os.path.join(path, file)
         dst = os.path.join(path, new_name)

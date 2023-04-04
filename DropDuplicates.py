@@ -1,10 +1,12 @@
 import os
 import hashlib
+from tools import *
 
 
 def group_files_by_size(directory):
 	file_groups = {}
-	for filename in os.listdir(directory):
+	filenames = os.listdir(directory)
+	for filename in filenames:
 		path = os.path.join(directory, filename)
 		if os.path.isfile(path):
 			size = os.path.getsize(path)
@@ -12,16 +14,17 @@ def group_files_by_size(directory):
 				file_groups[size].append(path)
 			else:
 				file_groups[size] = [path]
+	print(f'去重前文件个数：{len(filenames)}')
 	return file_groups
 
 
-def remove_duplicates(path, flag=0):
-	'''
+@print_time
+def remove_duplicates(path: str, flag: int = 0):
+	"""
 	:param path: 去重路径
-	:param flag: 0，default，通过使用MD5散列值比较文件，耗费资源更多，比较更为严格；1，通过hash值比较文件，计算较快，稳定性相对较弱
+	:param flag:0，default，通过使用MD5散列值比较文件，耗费资源更多，比较更为严格；1，通过hash值比较文件，计算较快，稳定性相对较弱
 	:return: unique_files列表
-	'''
-	# Step 1: Get the list of all files in the directory
+	"""
 	
 	# Step 2: Group the files by size
 	file_sizes = group_files_by_size(path)
@@ -48,5 +51,5 @@ def remove_duplicates(path, flag=0):
 	unique_files = []
 	for size in file_sizes:
 		unique_files.extend(file_sizes[size])
-	
+	print(f'去重后文件个数：{len(unique_files)}')
 	return unique_files

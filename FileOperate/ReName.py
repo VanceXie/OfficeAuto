@@ -33,10 +33,10 @@ def rename_by_num(path: str, num_loc: int = 0, fill_char: str = '0', length: int
 
 @print_time
 def rename_by_size(path: str):
-	'''
+	"""
 	:param path:
 	:return:
-	'''
+	"""
 	# 列出目录下所有文件
 	files = os.listdir(path)
 	

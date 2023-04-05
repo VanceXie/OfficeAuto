@@ -1,2 +1,2 @@
-from DropDuplicates import *
-from ReName import *
+from . import DropDuplicates
+from . import ReName

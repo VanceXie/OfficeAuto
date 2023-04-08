@@ -7,20 +7,22 @@ import time
 from tools import *
 
 
-def movefile(srcfile, dstpath):  # 移动函数
+def movefile(srcfile, dstdir):  # 移动函数
 	if not os.path.isfile(srcfile):
 		print("%s not exist!" % (srcfile))
 	else:
 		fpath, fname = os.path.split(srcfile)  # 分离文件名和路径
-		if not os.path.exists(dstpath):
-			os.makedirs(dstpath)  # 创建路径
-		shutil.move(srcfile, dstpath + fname)  # 移动文件
-		print("move %s -> %s" % (srcfile, dstpath + fname))
+		if not os.path.exists(dstdir):
+			os.makedirs(dstdir)  # 创建路径
+		dsypath = os.path.join(dstdir, fname)
+		shutil.move(srcfile, dsypath)  # 移动文件
+		print("move %s -> %s" % (srcfile, dsypath))
 
 
 def group_files_by_size(directory):
 	file_groups = {}
 	filenames = os.listdir(directory)
+	dir_num = 0
 	for filename in filenames:
 		path = os.path.join(directory, filename)
 		if os.path.isfile(path):
@@ -29,7 +31,9 @@ def group_files_by_size(directory):
 				file_groups[size].append(path)
 			else:
 				file_groups[size] = [path]
-	print(f'去重前文件个数：{len(filenames)}')
+		else:
+			dir_num += 1
+	print(f'去重前文件个数：{len(filenames) - dir_num}；去重前目录个数：{dir_num}')
 	return file_groups
 
 
@@ -63,7 +67,7 @@ def remove_duplicates(path: str, compare_flag: int = 0, delete_flag: int = 0):
 					if delete_flag == 1:
 						os.remove(filename)  # 删除文件
 					else:
-						movefile(os.path.join(path, filename), os.path.join(path, 'duplicates_' + datetime.datetime.now().strftime('%Y%m%d_%H:%M:%S')))  # 移动文件
+						movefile(os.path.join(path, filename), os.path.join(path, 'duplicates_' + datetime.datetime.now().strftime('%Y%m%d_%H%M%S')))  # 移动文件
 			file_sizes[size] = filenames
 	
 	# Step 5: Merge all the remaining files into a single list

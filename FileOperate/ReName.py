@@ -3,6 +3,32 @@ import re
 from tools import *
 
 
+def rename_by_sort(path: str, fill_char: str = '0', length: int = 3):
+	"""
+	:param path: path of files
+	:param fill_char: char of filling before filename，default ‘0’
+	:param length: length of filename，default 3
+	:return: None
+	"""
+	# 列出目录下所有文件
+	filenames = os.listdir(path)
+	
+	# 按照文件名中的数字排序
+	filenames.sort(key=str.lower)
+	
+	# 遍历文件并重命名
+	for index, filename in enumerate(filenames):
+		# 构造新文件名
+		new_filename_no_extension = "{:{fill_char}>{length}}".format(index + 1, fill_char=fill_char, length=length)
+		extension = filename.split('.')[-1].lower()
+		new_filename = '{}.{}'.format(new_filename_no_extension, extension)
+		# 拼接路径和文件名
+		src = os.path.join(path, filename)
+		dst = os.path.join(path, new_filename)
+		# 重命名文件
+		os.rename(src, dst)
+
+
 @print_time
 def rename_by_num(path: str, num_loc: int = 0, fill_char: str = '0', length: int = 3):
 	"""
@@ -71,7 +97,7 @@ def rename_by_size(path: str):
 def rename_by_type(path: str, condition):
 	# 遍历目录
 	for root, dirs, files in os.walk(path):
-		# 获取文件列表，并按文件大小排序
+		# 获取文件列表，并排序
 		files = sorted(files, key=condition)
 		
 		# 遍历文件

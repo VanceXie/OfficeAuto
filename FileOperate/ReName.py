@@ -13,7 +13,7 @@ def rename_by_sort(path: str, fill_char: str = '0', length: int = 3):
 	# 列出目录下所有文件
 	filenames = os.listdir(path)
 	
-	# 按照文件名中的数字排序
+	# 按照文件名排序
 	filenames.sort(key=str.lower)
 	
 	# 遍历文件并重命名

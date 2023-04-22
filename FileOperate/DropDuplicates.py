@@ -40,10 +40,11 @@ def group_files_by_size(directory):
 @print_time
 def remove_duplicates(path: str, compare_flag: int = 0, delete_flag: int = 0):
 	"""
+	
 	:param path: 去重路径
-	:param compare_flag:0，default，通过使用MD5散列值比较文件，耗费资源更多，比较更为严格；1，通过hash值比较文件，计算较快，稳定性相对较弱
+	:param compare_flag: 0，default，通过使用MD5散列值比较文件，耗费资源更多，比较更为严格；1，通过hash值比较文件，计算较快，稳定性相对较弱
+	:param delete_flag: delete_flag: 是否直接删除重复文件。default 0，则不删除仅集中放入“duplicates_datetime”文件夹；1，直接删除
 	:return: unique_files列表
-	:param delete_flag: 是否直接删除重复文件。default 0，则不删除仅集中放入“duplicates_datetime”文件夹；1，直接删除
 	"""
 	
 	# Step 2: Group the files by size

@@ -1,1 +1,1 @@
-from tools.Inform import print_time
+from tools.PerformanceEval import calculate_time

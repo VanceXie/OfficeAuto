@@ -2,6 +2,7 @@ import os
 import tarfile
 import threading
 import zipfile
+from tools.PerformanceEval import calculate_time
 
 
 def get_name_and_path(url):
@@ -75,63 +76,102 @@ def compress_files(folder_path, max_concurrent_files, dictionary_size, compressi
 	print('All files compressed successfully.')
 
 
-def winrar_compress(input_url, dict_size=64, rar=r'D:/Program Files/WinRAR'):
+def winrar_compress(input_urls_batch: list, dict_size=64, rar=r'D:/Program Files/WinRAR'):
 	"""
 	注意路径和文件名中带空格的时候一定要多加一重引号！！
-	:param input_url: 需要压缩的文件/文件夹名
+	:param input_urls_batch: 需要压缩的批量文件/文件夹名
 	:param dict_size: 压缩字典大小
 	:param rar: Rar路径，默认 rar_path='D:/Program Files/WinRAR'.
 	:return:
 	"""
-	name_with_extension, parent_path = get_name_and_path(input_url)
-	name_without_extension = os.path.splitext(name_with_extension)[0]
-	
-	password = '"' + name_without_extension + '"'
-	_output_url = '"' + os.path.join(parent_path, name_without_extension) + '"'
-	_input_url = '"' + input_url + '"'
-	
-	cmd_rar = rf'.\Rar.exe a -ep -hp{password} -md{dict_size} {_output_url} {_input_url}'
-	# -ep 参数来指定不保存文件的父目录，-ep 参数必须放在 rar 命令行最前面
-	
-	os.chdir(rar)  # RaR切换工作目录
-	result = os.system(cmd_rar)  # 执行压缩命令
-	if result == 0:
-		print('Successful Compress', input_url)
-	else:
-		print('FAILED Compress', input_url)
+	for input_url in input_urls_batch:
+		name_with_extension, parent_path = get_name_and_path(input_url)
+		name_without_extension = os.path.splitext(name_with_extension)[0]
+		
+		password = '"' + name_without_extension + '"'
+		_output_url = '"' + os.path.join(parent_path, name_without_extension) + '"'
+		_input_url = '"' + input_url + '"'
+		
+		cmd_rar = rf'.\Rar.exe a -ep -hp{password} -md{dict_size} {_output_url} {_input_url}'
+		# -ep 参数来指定不保存文件的父目录，-ep 参数必须放在 rar 命令行最前面
+		
+		os.chdir(rar)  # RaR切换工作目录
+		result = os.system(cmd_rar)  # 执行压缩命令
+		if result == 0:
+			print('Successful Compress', input_url)
+		else:
+			print('FAILED Compress', input_url)
 
 
-def winrar_uncompress(input_url, output_url=None, unrar=r'D:/Program Files/WinRAR'):
+@calculate_time
+def multithread_winrar_compress(folder_path, max_concurrent_files):
+	# 获取子目录和文件
+	dir_list = [os.path.join(folder_path, dir_name) for dir_name in os.listdir(folder_path)]
+	
+	threads = []
+	i = 0
+	while i < len(dir_list):
+		file_urls_batch = dir_list[i:i + max_concurrent_files]
+		t = threading.Thread(target=winrar_compress, args=(file_urls_batch,))
+		threads.append(t)
+		i += max_concurrent_files
+	for thread in threads:
+		thread.start()
+	for thread in threads:
+		thread.join()
+	print('All files compressed successfully.')
+
+
+def winrar_uncompress(input_urls_batch, output_url=None, unrar=r'D:/Program Files/WinRAR'):
 	"""
 	:param input_url: 待解压文件的绝对路径
 	:param output_url: 解压绝对路径, default None,解压到压缩文件所在路径
 	:param unrar: unrar 程序的路径
 	:return:
 	"""
-	name_with_extension, parent_path = get_name_and_path(input_url)
-	name_without_extension = os.path.splitext(name_with_extension)[0]
-	
-	password = '"' + name_without_extension + '"'
-	_input_url = '"' + input_url + '"'
-	
-	if output_url is None:
-		_output_url = '"' + os.path.join(parent_path, name_without_extension) + '\\"'  # 默认解压到本路径
-	else:
-		_output_url = '"' + os.path.join(output_url, name_without_extension) + '\\"'
-	
-	cmd_unrar = rf'.\UnRAR.exe x -p{password} {_input_url} {_output_url}'
-	'''
-	因为使用CMD（Command Prompt）执行程序不能在程序全路径外直接加
-	'''
-	os.chdir(unrar)  # 切换到RaR.exe所在目录
-	result = os.system(cmd_unrar)  # 执行压缩命令并返回执行状态
-	# 判断是否执行成功
-	if result == 0:
-		print('Successful unCompress', input_url)
-	else:
-		print('FAILED unCompress', input_url)
+	for input_url in input_urls_batch:
+		name_with_extension, parent_path = get_name_and_path(input_url)
+		name_without_extension = os.path.splitext(name_with_extension)[0]
+		
+		password = '"' + name_without_extension + '"'
+		_input_url = '"' + input_url + '"'
+		
+		if output_url is None:
+			_output_url = '"' + os.path.join(parent_path, name_without_extension) + '\\"'  # 默认解压到本路径
+		else:
+			_output_url = '"' + os.path.join(output_url, name_without_extension) + '\\"'
+		
+		cmd_unrar = rf'.\UnRAR.exe x -p{password} {_input_url} {_output_url}'
+		'''
+		因为使用CMD（Command Prompt）执行程序不能在程序全路径外直接加
+		'''
+		os.chdir(unrar)  # 切换到RaR.exe所在目录
+		result = os.system(cmd_unrar)  # 执行压缩命令并返回执行状态
+		# 判断是否执行成功
+		if result == 0:
+			print('Successful unCompress', input_url)
+		else:
+			print('FAILED unCompress', input_url)
 
+
+def multithread_winrar_uncompress(folder_path, max_concurrent_files):
+	# 获取子目录和文件
+	dir_list = [os.path.join(folder_path, dir_name) for dir_name in os.listdir(folder_path)]
+	
+	threads = []
+	i = 0
+	while i < len(dir_list):
+		file_urls_batch = dir_list[i:i + max_concurrent_files]
+		t = threading.Thread(target=winrar_uncompress, args=(file_urls_batch,))
+		threads.append(t)
+		i += max_concurrent_files
+	for thread in threads:
+		thread.start()
+	for thread in threads:
+		thread.join()
+	print('All files compressed successfully.')
 
 
 # winrar_compress(r"D:\vance\Downloads\[BlackK studio]出生促進委員会～3分で受精完了～コスモ発情フラッシュ!!!1秒で発情即ハメ～逃げる隙も与えられない!!!")
-winrar_uncompress(r"C:\Users\vance\Desktop\Temp\[BlackK studio]出生促進委員会～3分で受精完了～コスモ発情フラッシュ!!!1秒で発情即ハメ～逃げる隙も与えられない!!!.rar")
+# winrar_uncompress(r"C:\Users\vance\Desktop\Temp\[BlackK studio]出生促進委員会～3分で受精完了～コスモ発情フラッシュ!!!1秒で発情即ハメ～逃げる隙も与えられない!!!.rar")
+multithread_winrar_compress(r"D:\vance\Downloads", 1)

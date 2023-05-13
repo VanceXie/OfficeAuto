@@ -21,14 +21,3 @@ def get_app_install_path(program_name: str) -> str:
 				pass
 			i += 1
 		return None
-
-
-import os
-
-# 指定目录路径
-path = r"D:\vance\Pictures"
-# 获取子目录和文件
-dir_list = os.listdir(path)
-# 遍历并打印子目录和文件
-for dir_name in dir_list:
-	print(dir_name)

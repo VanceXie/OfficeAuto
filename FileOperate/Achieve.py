@@ -109,12 +109,11 @@ def multithread_winrar_compress(folder_path, max_concurrent_files):
 	dir_list = [os.path.join(folder_path, dir_name) for dir_name in os.listdir(folder_path)]
 	
 	threads = []
-	i = 0
-	while i < len(dir_list):
-		file_urls_batch = dir_list[i:i + max_concurrent_files]
+	files_num = len(dir_list)
+	for i in range(0, files_num, max_concurrent_files):
+		file_urls_batch = dir_list[i:min(files_num, i + max_concurrent_files)]
 		t = threading.Thread(target=winrar_compress, args=(file_urls_batch,))
 		threads.append(t)
-		i += max_concurrent_files
 	for thread in threads:
 		thread.start()
 	for thread in threads:
@@ -159,12 +158,11 @@ def multithread_winrar_uncompress(folder_path, max_concurrent_files):
 	dir_list = [os.path.join(folder_path, dir_name) for dir_name in os.listdir(folder_path)]
 	
 	threads = []
-	i = 0
-	while i < len(dir_list):
-		file_urls_batch = dir_list[i:i + max_concurrent_files]
+	files_num = len(dir_list)
+	for i in range(0, files_num, max_concurrent_files):
+		file_urls_batch = dir_list[i:min(files_num, i + max_concurrent_files)]
 		t = threading.Thread(target=winrar_uncompress, args=(file_urls_batch,))
 		threads.append(t)
-		i += max_concurrent_files
 	for thread in threads:
 		thread.start()
 	for thread in threads:
@@ -174,4 +172,4 @@ def multithread_winrar_uncompress(folder_path, max_concurrent_files):
 
 # winrar_compress(r"D:\vance\Downloads\[BlackK studio]出生促進委員会～3分で受精完了～コスモ発情フラッシュ!!!1秒で発情即ハメ～逃げる隙も与えられない!!!")
 # winrar_uncompress(r"C:\Users\vance\Desktop\Temp\[BlackK studio]出生促進委員会～3分で受精完了～コスモ発情フラッシュ!!!1秒で発情即ハメ～逃げる隙も与えられない!!!.rar")
-multithread_winrar_compress(r"D:\vance\Downloads", 1)
+multithread_winrar_compress(r"D:\vance\Downloads\1-84", 16)

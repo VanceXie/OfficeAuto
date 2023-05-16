@@ -1,10 +1,9 @@
 import datetime
-import os
 import hashlib
+import os
 import shutil
-import time
 
-from tools import *
+from tools import calculate_time
 
 
 def movefile(srcfile, dstdir):  # 移动函数
@@ -37,7 +36,7 @@ def group_files_by_size(directory):
 	return file_groups
 
 
-@print_time
+@calculate_time
 def remove_duplicates(path: str, compare_flag: int = 0, delete_flag: int = 0):
 	"""
 	

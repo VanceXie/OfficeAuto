@@ -89,7 +89,7 @@ def winrar_compress(input_urls_batch: list, dict_size=64, rar=r'D:/Program Files
 		name_without_extension = os.path.splitext(name_with_extension)[0]
 		
 		password = '"' + name_without_extension + '"'
-		_output_url = '"' + os.path.join(parent_path, name_without_extension) + '"'
+		_output_url = '"' + os.path.join(parent_path, name_without_extension + '.rar') + '"'
 		_input_url = '"' + input_url + '"'
 		
 		cmd_rar = rf'.\Rar.exe a -ep -hp{password} -md{dict_size} {_output_url} {_input_url}'
@@ -104,7 +104,7 @@ def winrar_compress(input_urls_batch: list, dict_size=64, rar=r'D:/Program Files
 
 
 @calculate_time
-def multithread_winrar_compress(folder_path, max_concurrent_files):
+def multithread_winrar_compress(folder_path, max_concurrent_files, dict_size: int = 64):
 	# 获取子目录和文件
 	dir_list = [os.path.join(folder_path, dir_name) for dir_name in os.listdir(folder_path)]
 	
@@ -112,7 +112,7 @@ def multithread_winrar_compress(folder_path, max_concurrent_files):
 	files_num = len(dir_list)
 	for i in range(0, files_num, max_concurrent_files):
 		file_urls_batch = dir_list[i:min(files_num, i + max_concurrent_files)]
-		t = threading.Thread(target=winrar_compress, args=(file_urls_batch,))
+		t = threading.Thread(target=winrar_compress, args=(file_urls_batch, dict_size,))
 		threads.append(t)
 	for thread in threads:
 		thread.start()
@@ -168,8 +168,3 @@ def multithread_winrar_uncompress(folder_path, max_concurrent_files):
 	for thread in threads:
 		thread.join()
 	print('All files compressed successfully.')
-
-
-# winrar_compress(r"D:\vance\Downloads\[BlackK studio]出生促進委員会～3分で受精完了～コスモ発情フラッシュ!!!1秒で発情即ハメ～逃げる隙も与えられない!!!")
-# winrar_uncompress(r"C:\Users\vance\Desktop\Temp\[BlackK studio]出生促進委員会～3分で受精完了～コスモ発情フラッシュ!!!1秒で発情即ハメ～逃げる隙も与えられない!!!.rar")
-multithread_winrar_compress(r"D:\vance\Downloads\1-84", 16)

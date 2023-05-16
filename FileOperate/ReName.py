@@ -1,6 +1,6 @@
 import os
 import re
-from tools import *
+from tools import calculate_time
 
 
 def rename_by_sort(path: str, start: int, fill_char: str = '0', length: int = 3):
@@ -30,7 +30,7 @@ def rename_by_sort(path: str, start: int, fill_char: str = '0', length: int = 3)
 		os.rename(src, dst)
 
 
-@print_time
+@calculate_time
 def rename_by_num(path: str, num_loc: int = 0, fill_char: str = '0', length: int = 3):
 	"""
 	:param num_loc: 根据字符串中的第几组连续数字进行排序，default 0
@@ -58,7 +58,7 @@ def rename_by_num(path: str, num_loc: int = 0, fill_char: str = '0', length: int
 		os.rename(src, dst)
 
 
-@print_time
+@calculate_time
 def rename_by_size(path: str):
 	"""
 	:param path:
@@ -94,7 +94,7 @@ def rename_by_size(path: str):
 		count += 1
 
 
-@print_time
+@calculate_time
 def rename_by_type(path: str, condition):
 	# 遍历目录
 	for root, dirs, files in os.walk(path):

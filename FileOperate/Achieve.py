@@ -86,7 +86,10 @@ def winrar_compress(input_urls_batch: list, dict_size=64, rar=r'D:/Program Files
 	"""
 	for input_url in input_urls_batch:
 		name_with_extension, parent_path = get_name_and_path(input_url)
-		name_without_extension = os.path.splitext(name_with_extension)[0]
+		if os.path.isdir(input_url):
+			name_without_extension = name_with_extension
+		else:
+			name_without_extension = os.path.splitext(name_with_extension)[0]
 		
 		password = '"' + name_without_extension + '"'
 		_output_url = '"' + os.path.join(parent_path, name_without_extension + '.rar') + '"'

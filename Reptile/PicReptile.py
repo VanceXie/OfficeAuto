@@ -19,7 +19,7 @@ class BingImagesSpider:
 	# 请求头
 	headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36'}
 	# 必应图片 url
-	bing_image_url_pattern = 'https://www.bing.com/images/async?q={}&first={}&count={}&mmasync=1'
+	bing_image_url_pattern = 'https://www.bing.com/images/async?q={}&first={}&count={}&qft=+filterui:aspect-square&mmasync=1'
 	
 	def __init__(self, keyword, amount, path='./'):
 		# keyword: 需爬取的关键字

@@ -95,11 +95,15 @@ def rename_by_size(path: str):
 
 
 @calculate_time
-def rename_by_type(path: str, condition):
+def rename_by_type(path: str):
+	"""
+	:param path:
+	:return:
+	"""
 	# 遍历目录
 	for root, dirs, files in os.walk(path):
 		# 获取文件列表，并排序
-		files = sorted(files, key=condition)
+		files = sorted(files, key=str.lower)
 		
 		# 遍历文件
 		for i, file in enumerate(files):

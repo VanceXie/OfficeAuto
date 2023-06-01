@@ -3,7 +3,10 @@ import hashlib
 import os
 import shutil
 
+import numpy as np
+
 from tools import calculate_time
+import cv2
 
 
 def movefile(srcfile, dstdir):  # 移动函数
@@ -76,3 +79,93 @@ def remove_duplicates(path: str, compare_flag: int = 0, delete_flag: int = 0):
 		unique_files.extend(file_sizes[size])
 	print(f'去重后文件个数：{len(unique_files)}')
 	return unique_files
+
+
+# 余弦相似度计算
+from PIL import Image
+from numpy import average, dot, linalg
+
+
+# 对图片进行统一化处理
+def get_thum(image, size=(64, 64), greyscale=False):
+	# 利用image对图像大小重新设置, Image.ANTIALIAS为高质量的
+	image = image.resize(size, Image.Resampling.LANCZOS)
+	if greyscale:
+		# 将图片转换为L模式，其为灰度图，其每个像素用8个bit表示
+		image = image.convert('L')
+	return image
+
+
+# 计算图片的余弦距离
+def image_similarity_vectors(images):
+	"""
+	:param images: 二维列表，每一行代表拉成一维的图片
+	:return: corr_coef,相关系数; res,图片间的点积
+	"""
+	# 求每个图片间的相关系数
+	corr_coef = np.corrcoef(images)
+	# 求图片的范数
+	norms = np.linalg.norm(images, axis=1)
+	images_norms = images / norms[:, np.newaxis]
+	# dot返回的是点积，对二维数组（矩阵）进行计算
+	res = np.dot(images_norms, images_norms.T)
+	return corr_coef, res
+
+
+# image1 = Image.open(r'D:\vance\Downloads\知一妹妹\pics\0234.jpg')
+# image2 = Image.open(r'D:\vance\Downloads\知一妹妹\pics\0235.jpg')
+# cosin = image_similarity_vectors(image1, image2)
+# print('图片余弦相似度', cosin)
+def find_similar_images(folder_path, size: tuple):
+	images_path = ([os.path.join(folder_path, filename) for filename in os.listdir(folder_path) if filename.endswith(".jpg") or filename.endswith(".jpeg") or filename.endswith(".png")])
+	# Use the images_path list to find similar images
+	similar_images = []
+	images = [(cv2.resize((cv2.imdecode(np.fromfile(image_path, np.uint8), 0)), size)).ravel() for image_path in images_path]
+	corr_coef, res = image_similarity_vectors(images)
+	
+	for i in range(len(images_path)):
+		for j in range(i + 1, len(images_path)):
+			similarity = image_similarity_vectors(Image.open(images_path[i]), Image.open(images_path[j]))
+			if similarity > 0.995:
+				# Add the similar images to a list
+				similar_images.append((images_path[i], images_path[j]))
+	# Remove duplicate images from the list of similar images
+	unique_images = list(set(sum(similar_images, ())))
+	# Remove all but one image from each similar image group
+	for i in range(len(unique_images)):
+		for j in range(i + 1, len(unique_images)):
+			if unique_images[i] in unique_images[j]:
+				unique_images[j] = unique_images[j].replace(unique_images[i], "")
+	# Remove empty strings from the list of similar images
+	unique_images = [x for x in unique_images if x != ""]
+	# Group similar images together
+	similar_groups = []
+	for image in unique_images:
+		group = [x for x in unique_images if x.startswith(image)]
+		if len(group) > 1:
+			similar_groups.append(group)
+	# Remove all but one image from each similar image group
+	unique_groups = []
+	for group in similar_groups:
+		unique_groups.append((group[0],))
+	# Convert the list of unique image groups to a list of similar image pairs
+	similar_images = []
+	for group in unique_groups:
+		for i in range(len(group)):
+			for j in range(i + 1, len(group)):
+				similar_images.append((group[i], group[j]))
+	return similar_images
+
+
+def delete_similar_images(similar_images):
+	for image_pair in similar_images:
+		for image_path in image_pair:
+			os.remove(image_path)
+	print("Similar images deleted successfully.")
+
+
+# # Example usage
+# folder_path = r"D:\vance\Downloads\知一妹妹\pics"
+# similar_images = find_similar_images(folder_path, (64, 64))
+# print(similar_images)
+# delete_similar_images(similar_images)

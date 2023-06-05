@@ -3,10 +3,11 @@ import re
 from tools import calculate_time
 
 
-def rename_by_sort(path: str, start: int, fill_char: str = '0', length: int = 3):
+def rename_by_sort(path: str, start: int, prefix: str = '', fill_char: str = '0', length: int = 3):
 	"""
-	:param start: start of the name
 	:param path: path of files
+	:param start: start of the name
+	:param prefix: char of prefix
 	:param fill_char: char of filling before filename，default ‘0’
 	:param length: length of filename，default 3
 	:return: None
@@ -20,7 +21,7 @@ def rename_by_sort(path: str, start: int, fill_char: str = '0', length: int = 3)
 	# 遍历文件并重命名
 	for index, filename in enumerate(filenames):
 		# 构造新文件名
-		new_filename_no_extension = "{:{fill_char}>{length}}".format(start + index, fill_char=fill_char, length=length)
+		new_filename_no_extension = prefix + "{:{fill_char}>{length}}".format(start + index, fill_char=fill_char, length=length)
 		extension = filename.split('.')[-1].lower()
 		new_filename = '{}.{}'.format(new_filename_no_extension, extension)
 		# 拼接路径和文件名

@@ -20,15 +20,16 @@ def rename_by_sort(path: str, start: int, prefix: str = '', fill_char: str = '0'
 	
 	# 遍历文件并重命名
 	for index, filename in enumerate(filenames):
-		# 构造新文件名
-		new_filename_no_extension = prefix + "{:{fill_char}>{length}}".format(start + index, fill_char=fill_char, length=length)
-		extension = filename.split('.')[-1].lower()
-		new_filename = '{}.{}'.format(new_filename_no_extension, extension)
-		# 拼接路径和文件名
-		src = os.path.join(path, filename)
-		dst = os.path.join(path, new_filename)
-		# 重命名文件
-		os.rename(src, dst)
+		if os.path.isfile(os.path.join(path, filename)):
+			# 构造新文件名
+			new_filename_no_extension = prefix + "{:{fill_char}>{length}}".format(start + index, fill_char=fill_char, length=length)
+			extension = filename.split('.')[-1].lower()
+			new_filename = '{}.{}'.format(new_filename_no_extension, extension)
+			# 拼接路径和文件名
+			src = os.path.join(path, filename)
+			dst = os.path.join(path, new_filename)
+			# 重命名文件
+			os.rename(src, dst)
 
 
 @calculate_time

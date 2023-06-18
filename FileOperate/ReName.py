@@ -125,3 +125,32 @@ def rename_by_type(path: str):
 			
 			# 重命名文件
 			os.rename(file_path, os.path.join(root, new_file_name))
+
+
+def rename_prefix_or_suffix(path: str, prefix: str, suffix: str, separator: str):
+	"""
+	add prefix or suffix into filename
+	:param path: path of files
+	:param prefix: string of prefix
+	:param suffix: string of suffix
+	:param separator: string of separator
+	:return: None
+	"""
+	# 列出目录下所有文件
+	filenames = os.listdir(path)
+	
+	# 按照文件名排序
+	filenames.sort(key=str.lower)
+	
+	# 遍历文件并重命名
+	for index, filename in enumerate(filenames):
+		# 构造新文件名
+		filename_no_extension, extension = os.path.splitext(filename)
+		new_filename_no_extension = prefix + separator + filename_no_extension + separator + suffix
+		
+		new_filename = new_filename_no_extension + extension
+		# 拼接路径和文件名
+		src = os.path.join(path, filename)
+		dst = os.path.join(path, new_filename)
+		# 重命名文件
+		os.rename(src, dst)

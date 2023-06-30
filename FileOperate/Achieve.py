@@ -76,11 +76,15 @@ def compress_files(folder_path, max_concurrent_files, dictionary_size, compressi
 	print('All files compressed successfully.')
 
 
-def winrar_compress(input_urls_batch: list, dict_size=64, rar=r'D:/Program Files/WinRAR'):
+def winrar_compress(input_urls_batch: list, dict_size=64, delete_cmd_str: str = '', rar=r'D:/Program Files/WinRAR'):
 	"""
 	注意路径和文件名中带空格的时候一定要多加一重引号！！
 	:param input_urls_batch: 需要压缩的批量文件/文件夹名
 	:param dict_size: 压缩字典大小
+	:param delete_cmd_str:
+			default, '', 保留源文件;
+			' -dr' 删除源文件到回收站;
+			' -df', 彻底删除源文件
 	:param rar: Rar路径，默认 rar_path='D:/Program Files/WinRAR'.
 	:return:
 	"""
@@ -95,7 +99,7 @@ def winrar_compress(input_urls_batch: list, dict_size=64, rar=r'D:/Program Files
 		_output_url = '"' + os.path.join(parent_path, name_without_extension + '.rar') + '"'
 		_input_url = '"' + input_url + '"'
 		
-		cmd_rar = rf'.\Rar.exe a -ep -hp{password} -md{dict_size} {_output_url} {_input_url}'
+		cmd_rar = rf'.\Rar.exe a{delete_cmd_str} -ep -hp{password} -md{dict_size} {_output_url} {_input_url}'
 		# -ep 参数来指定不保存文件的父目录，-ep 参数必须放在 rar 命令行最前面
 		
 		os.chdir(rar)  # RaR切换工作目录
@@ -107,15 +111,32 @@ def winrar_compress(input_urls_batch: list, dict_size=64, rar=r'D:/Program Files
 
 
 @calculate_time
-def multithread_winrar_compress(folder_path, max_concurrent_files, dict_size: int = 64):
+def multithread_winrar_compress(folder_path, max_concurrent_files, dict_size: int = 64, delete_flag: int = 0):
+	"""
+	:param folder_path: 需要压缩的批量文件/文件夹名
+	:param max_concurrent_files: 每个线程处理的文件数
+	:param dict_size: 压缩字典大小
+	:param delete_flag: 0,保留原文件; 1,删除原文件到回收站; 2,彻底删除源文件
+	:return:
+	"""
 	# 获取子目录和文件
 	dir_list = [os.path.join(folder_path, dir_name) for dir_name in os.listdir(folder_path)]
 	
 	threads = []
 	files_num = len(dir_list)
+	
+	if delete_flag == 0:
+		delete_cmd_str = ''
+	elif delete_flag == 1:
+		delete_cmd_str = ' -dr'
+	elif delete_flag == 2:
+		delete_cmd_str = ' -df'
+	else:
+		raise SyntaxError('parameter type is error')
+	
 	for i in range(0, files_num, max_concurrent_files):
 		file_urls_batch = dir_list[i:min(files_num, i + max_concurrent_files)]
-		t = threading.Thread(target=winrar_compress, args=(file_urls_batch, dict_size,))
+		t = threading.Thread(target=winrar_compress, args=(file_urls_batch, dict_size, delete_cmd_str,))
 		threads.append(t)
 	for thread in threads:
 		thread.start()
